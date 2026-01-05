@@ -24,4 +24,4 @@ for (let i = 0; i < 5e9; i++) {
 const end = Date.now();
 console.log(`3. Bloqueio acabou. Levou ${(end - start) / 1000} segundos.`);
 
-// Para rodar: npx ts-node src/fundamentals/single-thread.ts
+// Para rodar: npx ts-node src/fundamentais/single-thread.ts

@@ -30,4 +30,4 @@ doHash(4);
 doHash(5);
 doHash(6);
 
-// Para rodar: npx ts-node src/fundamentals/libuv.ts
+// Para rodar: npx ts-node src/fundamentais/libuv.ts

@@ -1,26 +1,61 @@
-/**
- * OBJETIVO: Demonstrar a prioridade de execução no Event Loop do Node.js.
- * * ORDEM TEÓRICA ESPERADA:
- * 1. Síncrono (Mainline)
- * 2. process.nextTick (Microtask - Alta prioridade)
- * 3. Promise.then (Microtask)
- * 4. setTimeout (Macrotask - Timers)
-*/
+import fs from "fs";
 
-console.log("A - Inicio (Síncrono)");
+/**
+ * OBJETIVO:
+ * Demonstrar como o Event Loop do Node.js gerencia a ordem das filas
+ * microtasks e diferentes fases do loop (Timers, Poll e Check),
+ *
+ * FLUXO GERAL:
+ *
+ * 1. Código Síncrono (Mainline)
+ *    - Executa imediatamente no Call Stack.
+ *
+ * 2. Microtasks
+ *    - process.nextTick
+ *    - Promise.then
+ *    Executam sempre logo após o código síncrono e
+ *    antes de qualquer fase do Event Loop.
+ *
+ * 3. Fases do Event Loop:
+ *    - Timers
+ *      Callbacks de setTimeout / setInterval cujo tempo expirou.
+ *
+ *    - Poll
+ *      Callbacks de operações de I/O (ex: fs.readFile),
+ *      executados SOMENTE quando o I/O realmente termina.
+ *
+ *    - Check
+ *      Callbacks de setImmediate, executados quando o loop
+ *      atinge a fase Check, independentemente de haver I/O pronto.
+ *
+ * OBSERVAÇÃO IMPORTANTE:
+ * - A fase Poll só ocorre se houver callbacks de I/O prontos.
+ * - Como a leitura de arquivo (I/O) leva tempo, a fase Poll estava vazia na primeira passagem do loop. 
+ * - Por isso, Check (setImmediate) pode executar antes do Poll.
+ */
+
+console.log("A - Código síncrono (mainline)");
 
 setTimeout(() => {
-  console.log("B - setTimeout (Macrotask / Timer Phase)");
+  console.log("B - Timers phase (setTimeout)");
 }, 0);
 
-Promise.resolve().then(() => {
-  console.log("C - Promise (Microtask Queue)");
+setImmediate(() => {
+  console.log("C - Check phase (setImmediate)");
+});
+
+fs.readFile(__filename, () => {
+  console.log("D - Poll phase (fs.readFile)");
 });
 
 process.nextTick(() => {
-  console.log("D - process.nextTick (Microtask Queue - Prioritária)");
+  console.log("E - Microtask (process.nextTick)");
 });
 
-console.log("E - Fim (Síncrono)");
+Promise.resolve().then(() => {
+  console.log("F - Microtask (Promise.then)");
+});
 
-// Para rodar: npx ts-node src/fundamentals/event-loop.ts
+console.log("G - Fim do código síncrono");
+
+// // Para rodar: npx ts-node src/fundamentais/event-loop.ts
